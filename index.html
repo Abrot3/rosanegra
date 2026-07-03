@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Rosa Negra — Portal Oficial de Investigação</title>
+    <meta name="description" content="Portal oficial de apoio à investigação criminal do caso Rosa Negra. Acesso restrito a investigadores autorizados.">
+    <meta name="theme-color" content="#050505">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- CSS Link -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Three.js, GLTFLoader & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        (function() {
+            const errorQueue = [];
+            window.onerror = function(message, source, lineno, colno, error) {
+                const errStr = `SYS ERR: ${message} at ${source}:${lineno}:${colno}`;
+                if (window.logSystemEvent) {
+                    window.logSystemEvent(errStr, "alert");
+                } else {
+                    errorQueue.push({ msg: errStr, type: "alert" });
+                }
+                return false;
+            };
+            window.addEventListener('unhandledrejection', function(event) {
+                const errStr = `PROMISE REJ: ${event.reason}`;
+                if (window.logSystemEvent) {
+                    window.logSystemEvent(errStr, "alert");
+                } else {
+                    errorQueue.push({ msg: errStr, type: "alert" });
+                }
+            });
+            const originalConsoleError = console.error;
+            console.error = function(...args) {
+                originalConsoleError.apply(console, args);
+                const msg = "CONSOLE ERR: " + args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+                if (window.logSystemEvent) {
+                    window.logSystemEvent(msg, "alert");
+                } else {
+                    errorQueue.push({ msg: msg, type: "alert" });
+                }
+            };
+            window.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    if (window.logSystemEvent) {
+                        errorQueue.forEach(item => window.logSystemEvent(item.msg, item.type));
+                    }
+                }, 500);
+            });
+        })();
+    </script>
+</head>
+<body>
+    <!-- Main Premium Mobile Shell Simulator for Desktop Previews -->
+    <div class="app-container">
+
+        <!-- CINEMATIC BOOT LOADING SCREEN -->
+        <div id="boot-loader" class="boot-loader">
+            <div class="boot-scanlines"></div>
+            <div class="boot-content">
+                <div class="boot-logo">
+                    <div class="boot-rose-icon">
+                        <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+                            <circle cx="30" cy="30" r="28" fill="none" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+                            <circle cx="30" cy="30" r="22" fill="none" stroke="rgba(239,68,68,0.6)" stroke-width="1.5" stroke-dasharray="4 4"/>
+                            <path d="M 20,20 L 40,20 C 40,20 40,42 30,52 C 20,42 20,20 20,20 Z" fill="none" stroke="rgba(239,68,68,0.8)" stroke-width="1.5"/>
+                            <circle cx="30" cy="32" r="5" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div class="boot-title">ROSA NEGRA</div>
+                    <div class="boot-subtitle">REDE DE INTELIGÊNCIA COMPARTILHADA // FID v3.1</div>
+                </div>
+                <div class="boot-progress-container">
+                    <div class="boot-progress-bar" id="boot-progress-bar"></div>
+                </div>
+                <div class="boot-log" id="boot-log-feed"></div>
+                <div class="boot-footer">FID-SECURE CHANNEL // END-TO-END ENCRYPTED // CLEARANCE REQUIRED</div>
+            </div>
+        </div>
+        
+        <!-- DRAMATIC ENTRY OVERLAY FOR CASE PORTAL -->
+        <div id="dramatic-entry-overlay" class="fullscreen-modal hidden" style="z-index: 10000; background: #0b0b0d; display: flex; align-items: center; justify-content: center; flex-direction: column; opacity: 1; transition: opacity 0.5s ease-out;">
+            <div class="ambient-noise" style="opacity: 0.15;"></div>
+            <div class="ambient-grid" style="opacity: 0.2;"></div>
+            <div class="scanline" style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(239, 68, 68, 0.4); animation: scanline-move 3s linear infinite;"></div>
+            
+            <div class="dramatic-seal-spinner" style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px;">
+                <div class="spinning-ring" style="position: absolute; width: 100%; height: 100%; border: 2px dashed rgba(239, 68, 68, 0.2); border-top-color: #ef4444; border-radius: 50%; animation: dramatic-spin 3s linear infinite;"></div>
+                <div class="spinning-ring-inner" style="position: absolute; width: 85%; height: 85%; border: 1px solid rgba(0, 240, 255, 0.1); border-bottom-color: rgba(239, 68, 68, 0.5); border-radius: 50%; animation: dramatic-spin-reverse 2s linear infinite;"></div>
+                <i data-lucide="shield-alert" style="width: 50px; height: 50px; color: #ef4444; filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.8));"></i>
+            </div>
+            
+            <h2 style="font-family: var(--font-display); font-size: 14px; letter-spacing: 4px; color: #fff; margin-bottom: 8px; text-shadow: 0 0 15px rgba(255,255,255,0.3); text-align: center;">INTRUSÃO DE SISTEMA INICIADA</h2>
+            <span class="badge badge-danger" style="margin-bottom: 24px; font-size: 9px; letter-spacing: 2px;">OPERAÇÃO ROSA NEGRA // #RN-09</span>
+            
+            <div class="dramatic-console" style="width: 320px; font-family: var(--font-mono); font-size: 10px; color: #94a3b8; line-height: 1.8; text-align: left; padding: 16px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.4); border-radius: 6px;">
+                <div class="console-line" id="de-line-1" style="opacity: 0; transition: opacity 0.3s ease-out;">&gt; ESTABELECENDO LINK SEGURO COM IML...</div>
+                <div class="console-line" id="de-line-2" style="opacity: 0; transition: opacity 0.3s ease-out;">&gt; DESCRIPTOGRAFANDO REGISTRO OPERACIONAL...</div>
+                <div class="console-line" id="de-line-3" style="opacity: 0; transition: opacity 0.3s ease-out;">&gt; ACESSO LIBERADO: PORTAL ROSA NEGRA</div>
+            </div>
+        </div>
+
+        <!-- Ambient Background Grid & Noise -->
+        <div class="ambient-noise"></div>
+        <div class="ambient-grid"></div>
+        <div class="classified-watermark">CONFIDENCIAL // OPERAÇÃO ROSA NEGRA</div>
+        
+        <!-- Persistent Top Header -->
+        <header id="app-header" class="hidden">
+            <div class="header-content">
+                <div class="header-left">
+                    <button id="btn-back" class="icon-btn hidden" aria-label="Voltar">
+                        <i data-lucide="chevron-left"></i>
+                    </button>
+                    <div class="status-connection">
+                        <span class="pulse-dot green"></span>
+                        <span class="status-text" id="header-timer">00:00:00</span>
+                    </div>
+                </div>
+                <div class="header-title">ROSA NEGRA</div>
+                <div class="header-right">
+                    <button id="btn-menu" class="icon-btn" aria-label="Menu do Portal">
+                        <i data-lucide="shield-alert"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Slide-down Notification Bar -->
+            <div id="alert-banner" class="alert-banner hidden">
+                <span id="alert-message">Notificação de Laboratório disponível</span>
+            </div>
+        </header>
+
+        <!-- Dropdown Menu / Investigator Drawer -->
+        <div id="menu-drawer" class="menu-drawer hidden">
+            <div class="drawer-header">
+                <h3>PAINEL DE CREDENCIAIS</h3>
+                <button id="btn-close-drawer" class="icon-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="drawer-body">
+                <div class="profile-info">
+                    <div class="avatar-placeholder">
+                        <i data-lucide="user-check"></i>
+                    </div>
+                    <div>
+                        <h4 id="display-investigator-name">Agente Não Identificado</h4>
+                        <p class="role-badge">INVESTIGADOR DESIGNADO</p>
+                    </div>
+                </div>
+                <hr class="drawer-divider">
+                <div class="system-stats">
+                    <div class="stat-row">
+                        <span>Status de Acesso:</span>
+                        <span class="highlight-green">AUTORIZADO</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Tempo de Sessão:</span>
+                        <span id="session-timer">00:00:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Evidências Coletadas:</span>
+                        <span id="evidence-count">0/3</span>
+                    </div>
+                </div>
+                <hr class="drawer-divider">
+                <button id="btn-logout" class="btn btn-secondary btn-full"><i data-lucide="log-out"></i> Encerrar Sessão</button>
+            </div>
+        </div>
+
+        <!-- MAIN VIEWPORT FOR ROUTED PAGES -->
+        <main class="viewport">
+
+            <!-- 1. LANDING PAGE -->
+            <section id="view-landing" class="view active">
+                <div class="landing-content">
+                    <div class="ambient-visuals">
+                        <!-- Technical cybernetic rotating canvas backdrops -->
+                        <canvas id="landing-canvas"></canvas>
+                    </div>
+                    
+                    <!-- Official Institutional Seal -->
+                    <div class="institutional-badge">
+                        <svg class="official-seal" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Circular outline -->
+                            <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+                            <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1"/>
+                            
+                            <!-- Star decorations -->
+                            <path d="M 50,22 L 51,25 L 54,25 L 52,27 L 53,30 L 50,28 L 47,30 L 48,27 L 46,25 L 49,25 Z" fill="rgba(255,255,255,0.4)"/>
+                            
+                            <!-- Shield vector -->
+                            <path d="M 38,36 L 62,36 C 62,36 62,56 50,66 C 38,56 38,36 38,36 Z" fill="none" stroke="rgba(0, 240, 255, 0.4)" stroke-width="2"/>
+                            
+                            <!-- Rose outline/cross in center -->
+                            <line x1="50" y1="36" x2="50" y2="66" stroke="rgba(239, 68, 68, 0.4)" stroke-width="1.5"/>
+                            <line x1="38" y1="48" x2="62" y2="48" stroke="rgba(239, 68, 68, 0.4)" stroke-width="1.5"/>
+                            <circle cx="50" cy="48" r="4" fill="none" stroke="rgba(239, 68, 68, 0.7)" stroke-width="2"/>
+                            
+                            <!-- Text path curve -->
+                            <path id="seal-text-path" d="M 12,50 A 38,38 0 1,1 88,50" fill="none"/>
+                            <text class="seal-text">
+                                <textPath href="#seal-text-path" startOffset="50%" text-anchor="middle">
+                                    FEDERAL INVESTIGATIVE DIVISION
+                                </textPath>
+                            </text>
+                            
+                            <path id="seal-text-path-bottom" d="M 88,50 A 38,38 0 0,1 12,50" fill="none"/>
+                            <text class="seal-text">
+                                <textPath href="#seal-text-path-bottom" startOffset="50%" text-anchor="middle">
+                                    ROSA NEGRA DIVISION
+                                </textPath>
+                            </text>
+                        </svg>
+                    </div>
+
+                    <div class="landing-logo">
+                        <h1 class="logo-text">ROSA NEGRA</h1>
+                        <p class="logo-subtext">PORTAL DE SEGURANÇA E INVESTIGAÇÃO INTEGRADA</p>
+                    </div>
+                    
+                    <div class="landing-footer">
+                        <div class="case-classification">
+                            <div class="class-item">
+                                <span class="label">ARQUIVO DE CRIME</span>
+                                <span class="value">#RN-09-ROSA</span>
+                            </div>
+                            <div class="class-item">
+                                <span class="label">NÍVEL DE ACESSO</span>
+                                <span class="value redact">CLASSIFIED // NOFORN</span>
+                            </div>
+                        </div>
+                        <button id="btn-start" class="btn btn-primary btn-glow animate-pulse">
+                            INICIAR INVESTIGAÇÃO
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. LOGIN DO INVESTIGADOR -->
+            <section id="view-login" class="view">
+                <div class="login-content">
+                    <div class="login-header">
+                        <div class="restricted-badge"><i data-lucide="shield-alert"></i> RESTRICTED ACCESS AREA</div>
+                        <h2>AUTENTICAÇÃO DE AGENTE</h2>
+                        <p class="description">Insira seus dados cadastrados na Rede de Inteligência Compartilhada (RIC) para liberação dos dossiês.</p>
+                    </div>
+                    <form id="form-login" class="login-form">
+                        <div class="form-group">
+                            <label for="input-name">NOME DO INVESTIGADOR</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="user"></i>
+                                <input type="text" id="input-name" placeholder="Ex: Det. Santos" required autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-password">SENHA DE ACESSO</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="lock"></i>
+                                <input type="password" id="input-password" placeholder="••••••••" required autocomplete="off">
+                            </div>
+                            <span class="form-help">Nota: Qualquer senha narrativa é aceita.</span>
+                        </div>
+                        <div class="form-feedback error hidden" id="login-feedback">
+                            <i data-lucide="alert-triangle"></i> Credenciais inválidas ou link indefinido.
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            AUTENTICAR LINK SEGURO
+                            <i data-lucide="shield-check"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 2B. INTRODUÇÃO (DEPOIMENTO DO DETETIVE) -->
+            <section id="view-intro" class="view">
+                <div class="intro-content">
+                    <div class="section-header-block">
+                        <div class="restricted-badge" style="margin-bottom: 8px;"><i data-lucide="folder-open"></i> DEPOIMENTO GRAVADO // OFICIAL</div>
+                        <h2 class="section-title">DEPOIMENTO DO DETETIVE</h2>
+                        <p class="section-subtitle">Transcrição de áudio registrada pelo Investigador Encarregado.</p>
+                    </div>
+
+                    <!-- Meta information -->
+                    <div class="intro-meta-box">
+                        <div class="meta-row">
+                            <span class="meta-label">INVESTIGADOR RESPONSÁVEL:</span>
+                            <span class="meta-value display-agent">Agente</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">CASO:</span>
+                            <span class="meta-value">#RN-09-ROSA</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">STATUS DE INVESTIGAÇÃO:</span>
+                            <span class="meta-value" style="color: var(--color-cyan-glow);">DEPOIMENTO ATIVO</span>
+                        </div>
+                    </div>
+
+                    <!-- Deposition text box -->
+                    <div class="dossier-card" style="margin-top: 16px;">
+                        <h3 style="color: var(--color-cyan-glow); font-size: 11px; margin-bottom: 12px; font-family: var(--font-display); letter-spacing: 1px;">ÁUDIO-TRANSCRIÇÃO FORENSE // RIC</h3>
+                        <p id="intro-narrative-text" style="font-family: var(--font-mono); font-size: 11px; line-height: 1.7; color: #d1d5db; min-height: 220px; white-space: pre-wrap; margin-bottom: 0;"></p>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button id="intro-skip-btn" class="btn btn-secondary btn-full">
+                            PULAR DEPOIMENTO
+                            <i data-lucide="fast-forward"></i>
+                        </button>
+                        <button id="intro-start-btn" class="btn btn-primary btn-full" disabled>
+                            ABRIR PAINEL DE INVESTIGAÇÃO
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. PORTAL DO CASO (CORE HUB) -->
+            <section id="view-portal" class="view">
+                <div class="portal-content">
+
+                    <!-- Victim profile card at the top -->
+                    <div class="victim-profile-card">
+                        <div class="victim-stamp">VÍTIMA // CASO ATIVO</div>
+                        <div class="victim-profile-inner">
+                            <div class="victim-photo-frame">
+                                <img src="daniela.jpg" alt="Daniela Alborghetti" class="victim-photo-img">
+                                <div class="victim-photo-scanline"></div>
+                            </div>
+                            <div class="victim-info">
+                                <div class="victim-name">Daniela Alborghetti</div>
+                                <div class="victim-age">23 anos — Universitária</div>
+                                <div class="victim-details-grid">
+                                    <div class="vd-item"><span class="vd-label">DATA</span><span class="vd-val">10/09/2023</span></div>
+                                    <div class="vd-item"><span class="vd-label">LOCAL</span><span class="vd-val">Apt. 302</span></div>
+                                    <div class="vd-item"><span class="vd-label">CAUSA</span><span class="vd-val">Homicídio</span></div>
+                                    <div class="vd-item"><span class="vd-label">STATUS</span><span class="vd-val victim-status-active">ABERTO</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Navigation Modules -->
+                    <div class="modules-section">
+                        <h3>MÓDULOS OPERACIONAIS</h3>
+                        <div class="modules-grid">
+                            <!-- Scene 3D Module -->
+                            <button class="module-card btn-route" data-target="view-scene">
+                                <div class="module-icon"><i data-lucide="box"></i></div>
+                                <div class="module-info">
+                                    <h4>Cena do Crime 3D</h4>
+                                    <p>Análise tridimensional do local do incidente.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow"></i>
+                            </button>
+                            <!-- Autopsy Module -->
+                            <button class="module-card btn-route" data-target="view-autopsy">
+                                <div class="module-icon"><i data-lucide="activity"></i></div>
+                                <div class="module-info">
+                                    <h4>Autópsia</h4>
+                                    <p>Laudo do legista e modelo anatômico do corpo.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow"></i>
+                            </button>
+                            <!-- Suspects Module -->
+                            <button class="module-card btn-route" data-target="view-suspects">
+                                <div class="module-icon"><i data-lucide="users"></i></div>
+                                <div class="module-info">
+                                    <h4>Suspeitos</h4>
+                                    <p>Fichas criminais, álibis e depoimentos coletados.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow"></i>
+                            </button>
+                            <!-- Victim's Phone Module -->
+                            <button class="module-card btn-route" data-target="view-phone">
+                                <div class="module-icon"><i data-lucide="smartphone"></i></div>
+                                <div class="module-info">
+                                    <h4>Celular da Vítima</h4>
+                                    <p>Arquivos, histórico de chamadas e mensagens.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow"></i>
+                            </button>
+                            <!-- Lab Module -->
+                            <button class="module-card btn-route" data-target="view-lab">
+                                <div class="module-icon"><i data-lucide="beaker"></i></div>
+                                <div class="module-info">
+                                    <h4>Laboratório Forense</h4>
+                                    <p>Resultados de DNA, digitais e substâncias.</p>
+                                    <span class="badge badge-accent hidden" id="lab-pending-badge">ANÁLISE</span>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow"></i>
+                            </button>
+                            <!-- Final Accusation -->
+                            <button class="module-card btn-route highlight-danger" data-target="view-accusation">
+                                <div class="module-icon"><i data-lucide="gavel"></i></div>
+                                <div class="module-info">
+                                    <h4>Acusação Final</h4>
+                                    <p>Arquivar relatório final do caso e emitir mandado.</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="arrow"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- System Terminal Console Logs -->
+                    <div class="terminal-logs-section">
+                        <div class="terminal-header">
+                            <i data-lucide="terminal"></i>
+                            <h3>LOGS DE SISTEMA // SECURE_SHELL</h3>
+                        </div>
+                        <div class="terminal-console">
+                            <div id="terminal-log-feed">
+                                <!-- Appended dynamically via app.js -->
+                            </div>
+                            <div class="terminal-input-line">
+                                <span class="terminal-prompt">></span>
+                                <span class="terminal-cursor">_</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. CENA DO CRIME (3D) -->
+            <section id="view-scene" class="view">
+                <div class="scene-3d-wrapper">
+                    <!-- WebGL Container -->
+                    <div id="crime-scene-canvas-container" class="canvas-3d-container"></div>
+                    
+                    <!-- HUD Overlays -->
+                    <div class="hud-top">
+                        <div class="hud-indicator"><i data-lucide="eye"></i> MODO LENTE DE EXAME</div>
+                        <div class="hud-controls-hint">Arraste para rotacionar. Toque nos marcadores.</div>
+                    </div>
+
+                    <!-- WebGL Telemetry Coordinates -->
+                    <div class="hud-telemetry">
+                        <div class="tel-row">CAM_X: <span id="scene-tel-x">0.00</span></div>
+                        <div class="tel-row">CAM_Y: <span id="scene-tel-y">0.00</span></div>
+                        <div class="tel-row">CAM_Z: <span id="scene-tel-z">0.00</span></div>
+                        <div class="tel-row">TGT_ROT: <span id="scene-tel-rot">0.00</span>rad</div>
+                    </div>
+
+                    <!-- Slide-up / Slide-down Bottom Detail Panel -->
+                    <div id="scene-detail-panel" class="bottom-sheet">
+                        <div class="sheet-drag-handle"></div>
+                        <div class="sheet-content">
+                            <div class="sheet-header">
+                                <h3 id="scene-evidence-title">Evidência Desconhecida</h3>
+                                <button id="btn-close-scene-sheet" class="icon-btn"><i data-lucide="x"></i></button>
+                            </div>
+                            <div class="sheet-body">
+                                <p id="scene-evidence-description">Nenhum detalhe disponível.</p>
+                                <div class="evidence-media-placeholder">
+                                    <div class="media-visual">
+                                        <i data-lucide="scan-search"></i>
+                                        <span>REGISTRO FORENSE DIGITAL</span>
+                                    </div>
+                                </div>
+                                <div class="sheet-actions">
+                                    <button id="btn-send-to-lab" class="btn btn-primary btn-full">
+                                        <i data-lucide="beaker"></i> RECOLHER E ENVIAR AO LABORATÓRIO
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Camera Quick-Access Buttons -->
+                    <div class="hud-camera-controls">
+                        <button class="camera-btn" data-camera="corpo">🌹 ROSA</button>
+                        <button class="camera-btn" data-camera="vidro">🔬 VIDRO</button>
+                        <button class="camera-btn" data-camera="celular">📱 CELULAR</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. AUTÓPSIA (3D / ANALYTICAL DIALOGUE) -->
+            <section id="view-autopsy" class="view">
+                <div class="autopsy-wrapper">
+                    <!-- WebGL anatomical silhouette container -->
+                    <div id="autopsy-canvas-container" class="canvas-3d-container"></div>
+                    
+                    <!-- HUD overlays -->
+                    <div class="hud-top">
+                        <div class="hud-indicator"><i data-lucide="shield-alert"></i> LAUDO NECROSCÓPICO 3D</div>
+                        <div class="hud-controls-hint">Toque nas marcas vermelhas para detalhar lesões.</div>
+                    </div>
+
+                    <!-- WebGL Telemetry Coordinates -->
+                    <div class="hud-telemetry red-hud">
+                        <div class="tel-row">CORP_X: <span id="autopsy-tel-x">0.00</span></div>
+                        <div class="tel-row">CORP_Y: <span id="autopsy-tel-y">0.00</span></div>
+                        <div class="tel-row">CORP_Z: <span id="autopsy-tel-z">0.00</span></div>
+                        <div class="tel-row">SENS_VAL: <span id="autopsy-tel-rot">0.00</span>%</div>
+                    </div>
+
+                    <!-- Side/Bottom Detail Sheet -->
+                    <div id="autopsy-detail-panel" class="bottom-sheet">
+                        <div class="sheet-drag-handle"></div>
+                        <div class="sheet-content">
+                            <div class="sheet-header">
+                                <h3 id="autopsy-region-title">Região Corpórea</h3>
+                                <button id="btn-close-autopsy-sheet" class="icon-btn"><i data-lucide="x"></i></button>
+                            </div>
+                            <div class="sheet-body">
+                                <div class="autopsy-metadata">
+                                    <span class="badge badge-danger" id="autopsy-region-severity">GRAVE</span>
+                                </div>
+                                <p id="autopsy-region-description">Análise necrroscópica detalhada.</p>
+                                <div class="sheet-notes">
+                                    <strong>Relação com Evidências:</strong>
+                                    <p id="autopsy-region-relation">Conexão física sob análise.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anatomical Region Quick-Access (2 marcadores narrativos) -->
+                    <div class="hud-camera-controls">
+                        <button class="camera-btn" data-camera="neck">⚠️ PESCOÇO</button>
+                        <button class="camera-btn" data-camera="thigh">🦵 COXA</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. SUSPEITOS -->
+            <section id="view-suspects" class="view">
+                <div class="suspects-content">
+                    <div class="section-header-block">
+                        <div class="section-tag">FID // DEPT. INVESTIGAÇÃO</div>
+                        <h2 class="section-title">DOSSIÊS DE SUSPEITOS</h2>
+                        <p class="section-subtitle">Pessoas de interesse vinculadas à vítima e ao local do crime.</p>
+                        <div class="suspects-count-bar">
+                            <span class="suspect-count-label">INDIVÍDUOS SOB INVESTIGAÇÃO</span>
+                            <span class="suspect-count-num">06</span>
+                        </div>
+                    </div>
+                    
+                    <div class="suspects-list" id="suspects-container">
+                        <!-- Suspect cards generated dynamically -->
+                    </div>
+
+                    <!-- Suspect Profile Detail Drawer (Fullscreen or full sheet) -->
+                    <div id="suspect-detail-modal" class="fullscreen-modal hidden">
+                        <div class="modal-header">
+                            <button id="btn-close-suspect-modal" class="icon-btn"><i data-lucide="arrow-left"></i> Voltar</button>
+                            <span class="dossier-code">DOSSIÊ // DEPT. POLÍCIA</span>
+                        </div>
+                        <div class="modal-body" id="suspect-modal-content">
+                            <!-- Template injected via app.js -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. CELULAR DA VÍTIMA -->
+            <section id="view-phone" class="view">
+                <div class="phone-wrapper">
+                    
+                    <!-- Locked Padlock Screen -->
+                    <div id="phone-lockscreen" class="phone-screen active-screen" style="position: relative;">
+                        <!-- Phone Lockout Overlay -->
+                        <div id="phone-lockout-screen" class="phone-lockout-overlay hidden">
+                            <div class="lockout-box">
+                                <i data-lucide="shield-alert" class="lockout-icon"></i>
+                                <h3>DISPOSITIVO BLOQUEADO PERMANENTEMENTE</h3>
+                                <p class="lockout-subtitle" style="color: #ff3366; font-weight: bold; margin-bottom: 8px;">Acesso Negado</p>
+                                <p class="lockout-description" style="font-size: 10px; color: var(--color-gray-subtle); line-height: 1.5;">
+                                    As chaves de criptografia do chip de segurança física foram destruídas após 5 tentativas de invasão malsucedidas.
+                                    Os arquivos deste celular não podem mais ser acessados nesta investigação.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="phone-time">18:42</div>
+                        <div class="phone-date">Quarta-feira, 12 de Outubro</div>
+                        
+                        <div class="padlock-container">
+                            <i data-lucide="lock" class="padlock-icon animate-pulse"></i>
+                            <p class="lock-status">DISPOSITIVO CRIPTOGRAFADO</p>
+                            <p class="lock-hint">Dica do Jogo Físico: Ano da fundação da Sociedade Rosa Negra</p>
+                        </div>
+                        
+                        <div class="pin-entry-container">
+                            <div class="pin-dots">
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                            <div id="phone-pin-attempts" class="pin-attempts-label">Tentativas restantes: 5</div>
+                            
+                            <div class="pin-grid">
+                                <button class="pin-btn" data-val="1">1</button>
+                                <button class="pin-btn" data-val="2">2</button>
+                                <button class="pin-btn" data-val="3">3</button>
+                                <button class="pin-btn" data-val="4">4</button>
+                                <button class="pin-btn" data-val="5">5</button>
+                                <button class="pin-btn" data-val="6">6</button>
+                                <button class="pin-btn" data-val="7">7</button>
+                                <button class="pin-btn" data-val="8">8</button>
+                                <button class="pin-btn" data-val="9">9</button>
+                                <button class="pin-btn pin-clear"><i data-lucide="delete"></i></button>
+                                <button class="pin-btn" data-val="0">0</button>
+                                <button class="pin-btn pin-submit"><i data-lucide="check"></i></button>
+                            </div>
+                            <div id="phone-pin-error" class="pin-error-text hidden">CÓDIGO INCORRETO. TENTE NOVAMENTE.</div>
+                        </div>
+                    </div>
+
+                    <!-- Unlocked App Screen -->
+                    <div id="phone-homescreen" class="phone-screen hidden">
+                        <!-- Top status bar for victim's phone simulator -->
+                        <div class="phone-sim-header">
+                            <span>18:45</span>
+                            <span class="phone-sim-carrier">RN_SECURE_CELL</span>
+                            <div class="phone-sim-icons">
+                                <i data-lucide="wifi"></i>
+                                <i data-lucide="battery"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Messenger tabs -->
+                        <div class="phone-nav-tabs">
+                            <button class="phone-tab active" data-tab="phone-chats"><i data-lucide="message-square"></i> Mensagens</button>
+                            <button class="phone-tab" data-tab="phone-calls"><i data-lucide="phone"></i> Chamadas</button>
+                        </div>
+                        
+                        <!-- Tab contents -->
+                        <div class="phone-tab-content">
+                            <!-- Chats Tab -->
+                            <div id="phone-chats" class="phone-tab-pane active-pane">
+                                <div class="chat-list">
+                                    <!-- Dynamic chat list -->
+                                </div>
+                                <!-- Inside-Chat Detail Overlay -->
+                                <div id="chat-conversation-view" class="chat-conversation-view hidden">
+                                     <div class="conversation-header" style="display: flex; align-items: center; gap: 8px;">
+                                         <button id="btn-close-conversation" class="icon-btn" style="margin-right: 4px;"><i data-lucide="arrow-left"></i></button>
+                                         <div id="conversation-partner-avatar" class="chat-avatar" style="width: 28px; height: 28px; font-size: 8px; margin-right: 0;"></div>
+                                         <span id="conversation-partner-name">Contato</span>
+                                     </div>
+                                    <div class="conversation-messages" id="conversation-messages-list">
+                                        <!-- Injected via app.js -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Calls Tab -->
+                            <div id="phone-calls" class="phone-tab-pane">
+                                <div class="call-list" id="phone-calls-list">
+                                    <!-- Injected calls log -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. LABORATÓRIO -->
+            <section id="view-lab" class="view">
+                <!-- Lab Lock Screen (Security Bypass Game) -->
+                <div id="lab-lock-screen" class="lab-lock-container">
+                    <div class="lab-cover-container">
+                        <img src="lab_security_banner.jpg" alt="Terminal Security" class="lab-cover-img">
+                    </div>
+
+                    <!-- Introduction Screen (visible first) -->
+                    <div id="lab-lock-intro" class="lab-lock-intro-box">
+                        <div class="section-header-block text-center">
+                            <div class="section-tag">ACC // CONTROLE DE ACESSO TERMINAL</div>
+                            <h2 class="section-title">CORRESPONDÊNCIA DE SINAL REQUERIDA</h2>
+                            <p class="section-subtitle">Sincronize a assinatura de frequência para liberar o terminal do laboratório forense.</p>
+                        </div>
+                        
+                        <div class="lock-intro-content">
+                            <h3><i data-lucide="shield-alert" style="color: var(--color-cyan-glow); width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"></i> BYPASS DE SEGURANÇA</h3>
+                            <p>Os servidores forenses estão sob criptografia de assinatura de frequência de rede.</p>
+                            <p><strong>INSTRUÇÕES DO TERMINAL:</strong></p>
+                            <ul>
+                                <li>Ajuste a frequência, amplitude e fase da onda do usuário (<b>AZUL</b>) para corresponder à onda alvo (<b>VERDE TRACEJADA</b>).</li>
+                                <li>Assim que as ondas se alinharem, a correspondência atingirá 100%, liberando o acesso.</li>
+                                <li><strong>Atenção:</strong> Você terá exatamente <b>1 minuto</b> para realizar a sintonia assim que iniciar o desafio. Se o tempo esgotar, o terminal travará e exigirá uma nova assinatura.</li>
+                            </ul>
+                            
+                            <button id="btn-start-lab-lock" class="btn btn-primary btn-full btn-glow" style="margin-top: 20px;">
+                                <i data-lucide="play" style="width: 14px; height: 14px; margin-right: 4px;"></i> INICIAR DESAFIO
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Game Screen (hidden by default) -->
+                    <div id="lab-lock-game-wrapper" class="hidden">
+                        <div class="section-header-block text-center">
+                            <div class="section-tag">ACC // BYPASS EM EXECUÇÃO</div>
+                            <h2 class="section-title">SINTONIZADOR DE SINAL</h2>
+                        </div>
+                        
+                        <div class="oscilloscope-card" style="position: relative;">
+                            <!-- Countdown timer header -->
+                            <div class="lock-timer-bar">
+                                <span class="lock-timer-title"><i data-lucide="timer" class="timer-icon"></i> TEMPO RESTANTE:</span>
+                                <span class="lock-timer-value"><span id="lock-timer-label">60</span>s</span>
+                            </div>
+
+                            <!-- Failure Overlay Screen -->
+                            <div id="lock-fail-screen" class="lock-overlay-screen hidden">
+                                <i data-lucide="shield-alert" class="lock-overlay-icon"></i>
+                                <h3>FIREWALL BLOQUEADO</h3>
+                                <p>Assinatura de sinal expirou e o terminal foi travado.</p>
+                                <button id="btn-retry-lab-lock" class="btn btn-danger btn-glow">
+                                    <i data-lucide="refresh-cw"></i> REPETIR TENTATIVA
+                                </button>
+                            </div>
+
+                            <div class="oscilloscope-display" style="position: relative;">
+                                <canvas id="oscilloscope-canvas" width="400" height="200" class="oscilloscope-canvas"></canvas>
+                                <button id="btn-toggle-stabilizer" class="btn btn-stabilizer">
+                                    <i data-lucide="zap" class="stabilizer-btn-icon"></i> ESTABILIZAR ONDAS
+                                </button>
+                            </div>
+
+                            <div class="lock-sliders">
+                                <div class="lock-slider-group">
+                                    <div class="slider-label-row">
+                                        <span class="slider-title"><i data-lucide="activity" class="slider-icon"></i> Frequência</span>
+                                        <span class="slider-value"><span id="val-freq">1.00</span> Hz</span>
+                                    </div>
+                                    <input type="range" id="slider-freq" min="0.5" max="4.0" step="0.05" value="1.5" class="lock-range-input">
+                                </div>
+
+                                <div class="lock-slider-group">
+                                    <div class="slider-label-row">
+                                        <span class="slider-title"><i data-lucide="bar-chart-2" class="slider-icon"></i> Amplitude</span>
+                                        <span class="slider-value"><span id="val-amp">30</span>%</span>
+                                    </div>
+                                    <input type="range" id="slider-amp" min="10" max="90" step="1" value="70" class="lock-range-input">
+                                </div>
+
+                                <div class="lock-slider-group">
+                                    <div class="slider-label-row">
+                                        <span class="slider-title"><i data-lucide="repeat" class="slider-icon"></i> Fase</span>
+                                        <span class="slider-value"><span id="val-phase">90</span>°</span>
+                                    </div>
+                                    <input type="range" id="slider-phase" min="0" max="360" step="5" value="180" class="lock-range-input">
+                                </div>
+                            </div>
+
+                            <div class="lock-status-block">
+                                <div class="lock-status-text">
+                                    <span>STATUS: <span id="lock-status-label" class="status-searching">PROCURANDO SINAL...</span></span>
+                                    <span class="sync-percent" id="sync-percent-label">0%</span>
+                                </div>
+                                <div class="lock-status-bar">
+                                    <div class="lock-status-bar-fill" id="sync-bar-fill" style="width: 0%"></div>
+                                </div>
+                                <button id="btn-unlock-lab" class="btn btn-unlock hidden">
+                                    <i data-lucide="unlock" class="unlock-btn-icon"></i> AUTORIZAR E ENTRAR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Laboratory Content (Visible after lock bypass) -->
+                <div id="lab-main-content" class="lab-content hidden">
+                    <div class="lab-cover-container">
+                        <img src="lab_security_banner.jpg" alt="Laboratório Forense" class="lab-cover-img">
+                    </div>
+
+                    <div class="section-header-block">
+                        <div class="section-tag">FID // ANÁLISE FORENSE</div>
+                        <h2 class="section-title">LABORATÓRIO FORENSE</h2>
+                        <p class="section-subtitle">Evidências e amostras químicas enviadas para análise detalhada.</p>
+                    </div>
+                    
+                    <div class="lab-queue">
+                        <h3>FILA DE ANÁLISE</h3>
+                        <div id="lab-items-container">
+                            <div class="empty-lab-state">
+                                <i data-lucide="beaker" class="lab-pulse-icon"></i>
+                                <p>Nenhuma evidência enviada.</p>
+                                <p class="sub">Explore a <strong>Cena do Crime 3D</strong> para coletar amostras relevantes para o caso.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. ACUSAÇÃO FINAL -->
+            <section id="view-accusation" class="view">
+                <div class="accusation-content">
+                    <div class="accusation-header">
+                        <i data-lucide="gavel" class="accusation-badge-icon"></i>
+                        <h2>RELATÓRIO DE INDICIAMENTO</h2>
+                        <p class="description">Você está prestes a fechar o caso Rosa Negra. Esta decisão é permanente e requer fundamentação legal.</p>
+                    </div>
+                    
+                    <form id="form-accusation" class="accusation-form">
+                        <div class="form-group">
+                            <label for="select-culprit">SELECIONE O CULPADO PRINCIPAL</label>
+                            <div class="select-wrapper">
+                                <i data-lucide="user-minus"></i>
+                                <select id="select-culprit" required>
+                                    <option value="" disabled selected>Escolha um suspeito...</option>
+                                    <!-- Options injected from Suspects list -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="input-justification">JUSTIFICATIVA LEGAL E PROVAS VINCULANTES</label>
+                            <textarea id="input-justification" rows="6" placeholder="Descreva os fatos, evidências e conexões que comprovam a autoria do crime..." required></textarea>
+                            <span class="form-help">Mencione os laudos laboratoriais e mensagens encontradas no celular.</span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-danger btn-full btn-glow">
+                            CONCLUIR CASO E EMITIR MANDADO
+                            <i data-lucide="send"></i>
+                        </button>
+                    </form>
+
+                    <!-- Accusation Result / Conclusion screen -->
+                    <div id="accusation-result-screen" class="fullscreen-modal hidden">
+                        <div class="result-box">
+                            <div class="radar-scan"></div>
+                            <i data-lucide="shield-check" class="success-icon"></i>
+                            <h2>MANDADO EMITIDO</h2>
+                            <p class="subtitle">Rosa Negra Portal — Banco de Dados Atualizado</p>
+                            
+                            <hr class="drawer-divider">
+                            
+                            <div class="result-summary">
+                                <div class="result-row">
+                                    <span>Indiciado:</span>
+                                    <strong id="result-culprit-name">Nome do Suspeito</strong>
+                                </div>
+                                <div class="result-row">
+                                    <span>Status do Caso:</span>
+                                    <span class="badge badge-success">ARQUIVADO // AGUARDANDO CAPTURA</span>
+                                </div>
+                                <div class="result-row">
+                                    <span>Código de Encerramento:</span>
+                                    <code id="result-code">RN-9371-X</code>
+                                </div>
+                            </div>
+                            
+                            <div class="justification-preview">
+                                <strong>Depoimento e Evidências Anexadas:</strong>
+                                <p id="result-justification-text">Texto da justificativa...</p>
+                            </div>
+                            
+                            <p class="final-instructions">Consulte o material físico do seu jogo <strong>Rosa Negra</strong> para conferir se o código de encerramento bate com o envelope de resolução do caso.</p>
+                            
+                            <button id="btn-restart-app" class="btn btn-secondary btn-full">Reiniciar Investigação</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <!-- Core Application Logic -->
+    <script src="app.js"></script>
+    <script src="scene3d.js"></script>
+</body>
+</html>
